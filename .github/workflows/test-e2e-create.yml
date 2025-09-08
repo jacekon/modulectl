@@ -33,7 +33,7 @@ jobs:
         run: echo "TEMPLATE_OPERATOR_LATEST_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Go setup
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
           cache-dependency-path: 'go.sum'
