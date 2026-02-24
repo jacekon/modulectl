@@ -8,6 +8,7 @@ import (
 
 	"github.com/kyma-project/lifecycle-manager/api/shared"
 	"ocm.software/ocm/api/ocm/compdesc"
+	ocmv1 "ocm.software/ocm/api/ocm/compdesc/meta/v1"
 	"ocm.software/ocm/api/ocm/cpi"
 	"ocm.software/ocm/api/ocm/extensions/repositories/comparch"
 
@@ -56,6 +57,7 @@ type ComponentConstructorService interface {
 		outputFile string,
 	) error
 	SetComponentLabel(componentConstructor *component.Constructor, name, value string)
+	SetResponsiblesLabel(componentConstructor *component.Constructor, team string)
 }
 
 type ComponentArchiveService interface {
@@ -318,6 +320,16 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 		shared.IsClusterScopedAnnotation,
 		strconv.FormatBool(isCRDClusterScoped))
 
+	// Add security scan label if enabled
+	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
+	if securityScanEnabled {
+		s.componentConstructorService.SetComponentLabel(constructor,
+			common.SecurityScanLabelKey, common.SecurityScanEnabledValue)
+	}
+
+	// Add responsibles label with team information
+	s.componentConstructorService.SetResponsiblesLabel(constructor, moduleConfig.Team)
+
 	opts.Out.Write("- Creating component constructor file\n")
 	if err = s.componentConstructorService.CreateConstructorFile(constructor,
 		opts.OutputConstructorFile); err != nil {
@@ -337,6 +349,11 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 	)
 	if err != nil {
 		return fmt.Errorf("failed to populate component descriptor metadata: %w", err)
+	}
+
+	// Add OCM component labels
+	if err = s.setComponentDescriptorLabels(descriptor, moduleConfig, resourcePaths, opts); err != nil {
+		return err
 	}
 
 	if err = s.gitSourcesService.AddGitSources(descriptor, opts.ModuleSourcesGitDirectory, moduleConfig.Repository,
@@ -390,6 +407,35 @@ func (s *Service) useComponentDescriptor(moduleConfig *contentprovider.ModuleCon
 	err = s.createModuleTemplate(moduleConfig, descriptor, resourcePaths)
 	if err != nil {
 		return fmt.Errorf("failed to create module template: %w", err)
+	}
+	return nil
+}
+
+func (s *Service) setComponentDescriptorLabels(
+	descriptor *compdesc.ComponentDescriptor,
+	moduleConfig *contentprovider.ModuleConfig,
+	resourcePaths *types.ResourcePaths,
+	opts Options,
+) error {
+	opts.Out.Write("- Setting OCM Component labels\n")
+	if err := addLabelToDescriptor(descriptor, shared.BetaLabel, strconv.FormatBool(moduleConfig.Beta)); err != nil {
+		return fmt.Errorf("failed to add beta label: %w", err)
+	}
+	internalValue := strconv.FormatBool(moduleConfig.Internal)
+	if err := addLabelToDescriptor(descriptor, shared.InternalLabel, internalValue); err != nil {
+		return fmt.Errorf("failed to add internal label: %w", err)
+	}
+	requiresDowntimeValue := strconv.FormatBool(moduleConfig.RequiresDowntime)
+	if err := addLabelToDescriptor(descriptor, common.RequiresDowntimeLabelKey, requiresDowntimeValue); err != nil {
+		return fmt.Errorf("failed to add requires downtime label: %w", err)
+	}
+	isCRDClusterScoped, err := s.crdParserService.IsCRDClusterScoped(resourcePaths)
+	if err != nil {
+		return fmt.Errorf("failed to determine if CRD is cluster scoped: %w", err)
+	}
+	isClusterScopedValue := strconv.FormatBool(isCRDClusterScoped)
+	if err = addLabelToDescriptor(descriptor, shared.IsClusterScopedAnnotation, isClusterScopedValue); err != nil {
+		return fmt.Errorf("failed to add is cluster scoped label: %w", err)
 	}
 	return nil
 }
@@ -470,6 +516,15 @@ func getSecurityScanEnabled(moduleConfig *contentprovider.ModuleConfig) bool {
 		return true // default is enabled
 	}
 	return *moduleConfig.SecurityScanEnabled
+}
+
+func addLabelToDescriptor(descriptor *compdesc.ComponentDescriptor, name, value string) error {
+	label, err := ocmv1.NewLabel(name, value, ocmv1.WithVersion(common.VersionV1))
+	if err != nil {
+		return fmt.Errorf("failed to create label %s: %w", name, err)
+	}
+	descriptor.Labels = append(descriptor.Labels, *label)
+	return nil
 }
 
 func (s *Service) cleanupTempFiles(opts Options) {

@@ -85,3 +85,20 @@ func (s *Service) SetComponentLabel(
 
 	componentConstructor.AddLabel(labelName, value, common.VersionV1)
 }
+
+// SetResponsiblesLabel sets the cloud.gardener.cnudie/responsibles label with team information.
+func (s *Service) SetResponsiblesLabel(
+	componentConstructor *component.Constructor,
+	team string,
+) {
+	label := component.Label{
+		Name: common.ResponsiblesLabelKey,
+		Value: []component.ResponsibleEntry{{
+			GitHubHostname: common.GitHubHostname,
+			TeamName:       team,
+			Type:           common.ResponsibleTypeGitHubTeam,
+		}},
+		Version: common.VersionV1,
+	}
+	componentConstructor.Components[0].Labels = append(componentConstructor.Components[0].Labels, label)
+}

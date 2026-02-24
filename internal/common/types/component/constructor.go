@@ -47,8 +47,18 @@ type Access struct {
 
 type Label struct {
 	Name    string `yaml:"name"`
-	Value   string `yaml:"value"`
+	Value   any    `yaml:"value"`
 	Version string `yaml:"version,omitempty"`
+}
+
+// ResponsibleEntry represents a responsible team entry in OCM component descriptor.
+// Field names use snake_case to match OCM specification format.
+//
+//nolint:tagliatelle // OCM spec requires snake_case field names
+type ResponsibleEntry struct {
+	GitHubHostname string `yaml:"github_hostname"`
+	TeamName       string `yaml:"teamname"`
+	Type           string `yaml:"type"`
 }
 
 type Resource struct {
@@ -127,19 +137,6 @@ func (c *Constructor) AddLabel(key, value, version string) {
 	}
 	labels = append(labels, labelValue)
 	c.Components[0].Labels = labels
-}
-
-func (c *Constructor) AddLabelToSources(key, value, version string) {
-	for index, source := range c.Components[0].Sources {
-		labels := source.Labels
-		labelValue := Label{
-			Name:    key,
-			Value:   value,
-			Version: version,
-		}
-		labels = append(labels, labelValue)
-		c.Components[0].Sources[index].Labels = labels
-	}
 }
 
 func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
