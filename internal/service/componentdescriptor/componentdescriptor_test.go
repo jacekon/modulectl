@@ -89,19 +89,17 @@ func Test_InitializeComponentDescriptor_WithSecurityScanDisabled_DoesNotAddSecur
 	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, false)
 
 	require.NoError(t, err)
-	require.Len(t, descriptor.Labels, 1) // only responsibles label
-	require.Equal(t, "cloud.gardener.cnudie/responsibles", descriptor.Labels[0].Name)
-	require.Equal(t, "v1", descriptor.Labels[0].Version)
+	require.Empty(t, descriptor.Labels) // no labels when security scan is disabled
 }
 
 func Test_InitializeComponentDescriptor_AddsResponsiblesLabel(t *testing.T) {
 	moduleName := "github.com/test-module"
 	moduleVersion := "0.0.1"
 	team := "my-awesome-team"
-	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, false)
+	descriptor, err := componentdescriptor.InitializeComponentDescriptor(moduleName, moduleVersion, team, true)
 
 	require.NoError(t, err)
-	require.Len(t, descriptor.Labels, 1)
+	require.Len(t, descriptor.Labels, 2) // responsibles + security scan labels
 
 	responsiblesLabel := descriptor.Labels[0]
 	require.Equal(t, "cloud.gardener.cnudie/responsibles", responsiblesLabel.Name)

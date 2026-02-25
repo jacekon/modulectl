@@ -44,6 +44,7 @@ func (s *Service) ParseAndValidateModuleConfig(moduleConfigFile string,
 	return moduleConfig, nil
 }
 
+//nolint:cyclop,funlen // validation function with many checks is acceptable
 func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 	if err := validation.ValidateModuleName(moduleConfig.Name); err != nil {
 		return fmt.Errorf("failed to validate module name: %w", err)
@@ -77,8 +78,11 @@ func ValidateModuleConfig(moduleConfig *contentprovider.ModuleConfig) error {
 		return fmt.Errorf("failed to validate repository: %w", err)
 	}
 
-	if moduleConfig.Team == "" {
-		return fmt.Errorf("failed to validate team: must not be empty: %w", commonerrors.ErrInvalidOption)
+	// Team is required only when security scan is enabled (default: true)
+	securityScanEnabled := moduleConfig.SecurityScanEnabled == nil || *moduleConfig.SecurityScanEnabled
+	if securityScanEnabled && moduleConfig.Team == "" {
+		return fmt.Errorf("failed to validate team: must not be empty when security scan is enabled: %w",
+			commonerrors.ErrInvalidOption)
 	}
 
 	if err := validation.ValidateIsValidHTTPSURL(moduleConfig.Documentation); err != nil {

@@ -320,15 +320,14 @@ func (s *Service) useComponentConstructor(moduleConfig *contentprovider.ModuleCo
 		shared.IsClusterScopedAnnotation,
 		strconv.FormatBool(isCRDClusterScoped))
 
-	// Add security scan label if enabled
+	// Add security scan and responsibles labels if security scan is enabled
 	securityScanEnabled := getSecurityScanEnabled(moduleConfig)
 	if securityScanEnabled {
 		s.componentConstructorService.SetComponentLabel(constructor,
 			common.SecurityScanLabelKey, common.SecurityScanEnabledValue)
+		// Add responsibles label with team information
+		s.componentConstructorService.SetResponsiblesLabel(constructor, moduleConfig.Team)
 	}
-
-	// Add responsibles label with team information
-	s.componentConstructorService.SetResponsiblesLabel(constructor, moduleConfig.Team)
 
 	opts.Out.Write("- Creating component constructor file\n")
 	if err = s.componentConstructorService.CreateConstructorFile(constructor,

@@ -180,7 +180,7 @@ var _ = Describe("Test 'create' command", Ordered, func() {
 			Expect(err).Should(HaveOccurred())
 			Expect(
 				err.Error(),
-			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate team: must not be empty: invalid Option"))
+			).Should(ContainSubstring("failed to parse module config: failed to validate module config: failed to validate team: must not be empty when security scan is enabled: invalid Option"))
 		})
 	})
 

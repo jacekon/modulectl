@@ -247,7 +247,7 @@ func Test_ValidateModuleConfig(t *testing.T) {
 					"module-icon": exampleIcon,
 				},
 			},
-			expectedError: fmt.Errorf("failed to validate team: must not be empty: %w",
+			expectedError: fmt.Errorf("failed to validate team: must not be empty when security scan is enabled: %w",
 				commonerrors.ErrInvalidOption),
 		},
 		{
