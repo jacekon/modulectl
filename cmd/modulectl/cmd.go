@@ -9,7 +9,6 @@ import (
 	scaffoldcmd "github.com/kyma-project/modulectl/cmd/modulectl/scaffold"
 	"github.com/kyma-project/modulectl/cmd/modulectl/version"
 	"github.com/kyma-project/modulectl/internal/service/componentconstructor"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
 	"github.com/kyma-project/modulectl/internal/service/contentprovider"
 	"github.com/kyma-project/modulectl/internal/service/crdparser"
 	"github.com/kyma-project/modulectl/internal/service/create"
@@ -108,7 +107,7 @@ func buildModuleService() (*create.Service, error) {
 		return nil, fmt.Errorf("failed to create module config service: %w", err)
 	}
 	gitService := git.NewService()
-	gitSourcesService, err := componentdescriptor.NewGitSourcesService(gitService)
+	gitSourcesService, err := componentconstructor.NewGitSourcesService(gitService)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create git sources service: %w", err)
 	}

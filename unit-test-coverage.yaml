@@ -11,10 +11,9 @@ packages:
   internal/service/moduleconfig/generator: 100
   internal/service/moduleconfig/reader: 82.8
   internal/service/create: 82.6
-  internal/service/componentdescriptor: 87.5
   internal/service/templategenerator: 87.1
   internal/service/crdparser: 73.3
   internal/service/manifestparser: 93.3
   internal/service/image: 94.6
-  internal/service/componentconstructor: 88.6
+  internal/service/componentconstructor: 88.4
   internal/common/utils/slices: 100

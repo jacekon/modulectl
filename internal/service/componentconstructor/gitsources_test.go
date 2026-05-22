@@ -1,4 +1,4 @@
-package componentdescriptor_test
+package componentconstructor_test
 
 import (
 	"errors"
@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/modulectl/internal/common/types/component"
-	"github.com/kyma-project/modulectl/internal/service/componentdescriptor"
+	"github.com/kyma-project/modulectl/internal/service/componentconstructor"
 )
 
 func TestGitSourcesService_AddGitSourcesToConstructor_AddsCorrectSource(t *testing.T) {
-	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceStub{latestCommit: "abcdefg"})
+	gitSourcesService, err := componentconstructor.NewGitSourcesService(&gitServiceStub{latestCommit: "abcdefg"})
 	require.NoError(t, err)
 
 	constructor := component.NewConstructor("test.io/module/test", "1.0.0")
@@ -33,7 +33,7 @@ func TestGitSourcesService_AddGitSourcesToConstructor_AddsCorrectSource(t *testi
 }
 
 func TestGitSourcesService_AddGitSourcesToConstructor_ReturnsErrorOnCommitRetrievalError(t *testing.T) {
-	gitSourcesService, err := componentdescriptor.NewGitSourcesService(&gitServiceErrorStub{})
+	gitSourcesService, err := componentconstructor.NewGitSourcesService(&gitServiceErrorStub{})
 	require.NoError(t, err)
 
 	constructor := component.NewConstructor("test.io/module/test", "1.0.0")

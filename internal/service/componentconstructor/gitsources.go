@@ -1,4 +1,4 @@
-package componentdescriptor
+package componentconstructor
 
 import (
 	"fmt"
