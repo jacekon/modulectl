@@ -2,13 +2,9 @@ package contentprovider
 
 import (
 	"fmt"
-	"regexp"
-
-	"github.com/Masterminds/semver/v3"
 
 	commonerrors "github.com/kyma-project/modulectl/internal/common/errors"
 	"github.com/kyma-project/modulectl/internal/common/types"
-	"github.com/kyma-project/modulectl/internal/service/image"
 )
 
 type SecurityConfig struct {
@@ -71,52 +67,8 @@ type SecurityScanConfig struct {
 	RcTag      string        `comment:"string, release candidate tag"                                                     json:"rc-tag"      yaml:"rc-tag"`     //nolint:tagliatelle // requires externally as snake case
 }
 
-func (s *SecurityScanConfig) ValidateBDBAImageTags(moduleVersion string) error {
-	foundCorrectManagerVersion := false
-	filteredImages := make([]string, 0, len(s.BDBA))
-	for _, img := range s.BDBA {
-		imageInfo, err := image.ParseImageInfo(img)
-		if err != nil {
-			return fmt.Errorf("failed to parse image reference: %w", err)
-		}
-		_, err = semver.NewVersion(imageInfo.Tag)
-		if err != nil {
-			return fmt.Errorf("failed to parse image tag [%s] as semantic version: %w", imageInfo.Tag, err)
-		}
-
-		filteredImages = append(filteredImages, img)
-
-		if !foundCorrectManagerVersion {
-			foundCorrectManagerVersion = isCorrectManagerVersion(img, moduleVersion)
-		}
-	}
-
-	if !foundCorrectManagerVersion {
-		return fmt.Errorf(
-			"no image with the correct manager version found in BDBA images 'europe-docker.pkg.dev/kyma-project/prod/<image-name>:%s', %w",
-			moduleVersion,
-			commonerrors.ErrInvalidArg,
-		)
-	}
-
-	s.BDBA = filteredImages
-	return nil
-}
-
 type MendSecConfig struct {
 	Language    string   `comment:"string, indicating the programming language the scanner has to analyze" json:"language"    yaml:"language"`
 	SubProjects string   `comment:"string, specifying any subprojects"                                     json:"subprojects" yaml:"subprojects"`
 	Exclude     []string `comment:"list, directories within the repository which should not be scanned"    json:"exclude"     yaml:"exclude"`
-}
-
-// revert this again with https://github.com/kyma-project/modulectl/issues/269
-// isCorrectManagerVersion checks if the image matches the expected registry and version for the manager
-// the exact image name is unknown.
-func isCorrectManagerVersion(image, moduleVersion string) bool {
-	regex := fmt.Sprintf(`^europe-docker\.pkg\.dev/kyma-project/prod/.*:%s$`, moduleVersion)
-	matched, err := regexp.MatchString(regex, image)
-	if err != nil {
-		return false
-	}
-	return matched
 }
