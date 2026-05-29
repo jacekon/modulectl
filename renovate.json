@@ -1,6 +1,84 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "labels": ["area/dependency", "kind/chore"],
+  "commitMessagePrefix": "chore(renovate):",
+  "gomod": {
+    "postUpdateOptions": ["gomodTidy"],
+    "enabled": true
+  },
+  "dockerfile": {
+    "enabled": false
+  },
+  "helm-values": {
+    "enabled": false
+  },
+  "kustomize": {
+    "enabled": false
+  },
+  "github-actions": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchCategories": ["golang"],
+      "postUpdateOptions": ["gomodTidy"],
+      "enabled": true
+    },
+    {
+      "matchManagers": ["gomod"],
+      "addLabels": ["go"],
+      "schedule": ["every day"],
+      "enabled": true
+    },
+    {
+      "matchDatasources": ["golang-version"],
+      "rangeStrategy": "bump"
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["digest"],
+      "schedule": "every month",
+      "enabled": false
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "All Kubernetes packages",
+      "matchPackageNames": ["k8s.io/**", "sigs.k8s.io/**"]
+    },
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "All Istio packages",
+      "matchPackageNames": ["istio.io/**"]
+    },
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "Ginkgo and Gomega",
+      "matchPackageNames": ["github.com/onsi/ginkgo/v2", "github.com/onsi/gomega"]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["^versions\\.yaml$"],
+      "matchStrings": ["golangciLint: \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver",
+      "depNameTemplate": "golangci/golangci-lint"
+    }
+  ],
+  "ignorePaths": ["docs/**"]
 }
