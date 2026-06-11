@@ -101,3 +101,7 @@ bin
 
 # copied template-operator repo
 tests/e2e/create/testdata/template-operator
+
+# claude
+.claude/settings.local.json
+**/CLAUDE.local.md
