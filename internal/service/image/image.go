@@ -36,6 +36,11 @@ func IsImageReferenceCandidate(value string) bool {
 		return false
 	}
 
+	// Exclude values that look like URLs (e.g., contain "://") as docker image references do not include schemes.
+	if strings.Contains(value, "://") {
+		return false
+	}
+
 	hasTagOrDigest := false
 	for _, c := range value {
 		switch c {

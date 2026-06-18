@@ -99,6 +99,11 @@ func TestIsImageReferenceCandidate_InvalidImages(t *testing.T) {
 			input:    "nginx\r:1.20",
 			expected: false,
 		},
+		{
+			name:     "contains protocol part",
+			input:    "http://api-server.myapp.svc.cluster.local:8080",
+			expected: false,
+		},
 	}
 
 	for _, tt := range tests {
