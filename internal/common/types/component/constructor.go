@@ -154,6 +154,11 @@ func (c *Constructor) AddImageAsResource(imageInfos []*image.ImageInfo) {
 					Value:   common.ThirdPartyImageLabelValue,
 					Version: common.OCMVersion,
 				},
+				{
+					Name:    common.OriginalImageReferenceLabelKey,
+					Value:   imageInfo.FullURL,
+					Version: common.OCMVersion,
+				},
 			},
 			Access: &Access{
 				Type:           OCIArtifactAccessType,

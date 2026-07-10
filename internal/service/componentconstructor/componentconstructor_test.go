@@ -169,8 +169,13 @@ func TestService_AddImagesToConstructor_Success(t *testing.T) {
 			require.NotEmpty(t, resource.Access)
 			require.Equal(t, component.OCIArtifactAccessType, resource.Access.Type)
 			require.NotEmpty(t, resource.Access.ImageReference)
-			require.Len(t, resource.Labels, 1)
+			require.Len(t, resource.Labels, 2)
+			require.Equal(t, common.SecScanBaseLabelKey+"/"+common.TypeLabelKey, resource.Labels[0].Name)
 			require.Equal(t, common.ThirdPartyImageLabelValue, resource.Labels[0].Value)
+			require.Equal(t, common.OCMVersion, resource.Labels[0].Version)
+			require.Equal(t, common.OriginalImageReferenceLabelKey, resource.Labels[1].Name)
+			require.Equal(t, resource.Access.ImageReference, resource.Labels[1].Value)
+			require.Equal(t, common.OCMVersion, resource.Labels[1].Version)
 		}
 	}
 	require.Equal(t, len(images), imageResourceCount)

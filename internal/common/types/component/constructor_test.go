@@ -126,12 +126,15 @@ func TestConstructor_AddImageAsResource(t *testing.T) {
 	resource := constructor.Components[0].Resources[0]
 	require.Equal(t, component.OCIArtifactResourceType, resource.Type)
 	require.Equal(t, component.OCIArtifactResourceRelation, resource.Relation)
-	require.Len(t, resource.Labels, 1)
+	require.Len(t, resource.Labels, 2)
 
 	expectedLabelName := common.SecScanBaseLabelKey + "/" + common.TypeLabelKey
 	require.Equal(t, expectedLabelName, resource.Labels[0].Name)
 	require.Equal(t, common.ThirdPartyImageLabelValue, resource.Labels[0].Value)
 	require.Equal(t, common.OCMVersion, resource.Labels[0].Version)
+	require.Equal(t, common.OriginalImageReferenceLabelKey, resource.Labels[1].Name)
+	require.Equal(t, imageInfo.FullURL, resource.Labels[1].Value)
+	require.Equal(t, common.OCMVersion, resource.Labels[1].Version)
 	require.Equal(t, component.OCIArtifactAccessType, resource.Access.Type)
 	require.Equal(t, imageInfo.FullURL, resource.Access.ImageReference)
 }
